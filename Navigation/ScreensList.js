@@ -11,7 +11,7 @@ const screens = [
   {
     component: WhatsAppTools,
     name: 'WhatsAppScreen',
-    headerShown:true,
+    headerShown:false,
     title:"WhatsApp Tools",
   },
 ];

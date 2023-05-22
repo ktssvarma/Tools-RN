@@ -1,33 +1,58 @@
-import { Modal, ScrollView, Text, Touchable, TouchableOpacity, View } from 'react-native'
-import React, { Component } from 'react'
+import React, { Component } from 'react';
+import { Modal, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 export class RangePicker extends Component {
-  state = {options: [], value: null};
+  state = {
+    options: [],
+    value: 0,
+    selectedIndex: 0,
+  };
+
   async componentDidMount() {
-    const {dataRange} = this.props;
+    const { dataRange } = this.props;
     await this.setState({
       options: Array.from(Array(dataRange[1] + 1).keys()).slice(dataRange[0]),
     });
   }
+
+  handleOptionPress = (index) => {
+    const { options } = this.state;
+    const selectedOption = options[index];
+    this.setState({ selectedIndex: index, value: selectedOption });
+  };
+
   render() {
-    const {options, value} = this.state;
-    const listOfOptions=()=>{
+    const { options, value, selectedIndex } = this.state;
+
+    const listOfOptions = () => {
       return options.map((item, index) => {
+        const isSelected = selectedIndex === index;
+
         return (
-          <View
+          <TouchableOpacity
             key={index}
-            style={{
-              backgroundColor: '#ACACAC80',
-              marginVertical: 2.5,
-              paddingVertical: 5,
-            }}>
-            <Text style={{textAlign: 'center', fontSize: 16, color: '#213576'}}>
+            onPress={() => this.handleOptionPress(index)}
+            style={[
+              {
+                borderRadius: 30,
+                marginVertical: 2.5,
+                paddingVertical: isSelected ? 10 : 5,
+              },
+              isSelected && {backgroundColor: '#5e79d2'},
+            ]}>
+            <Text
+              style={{
+                textAlign: 'center',
+                fontSize: isSelected ? 20 : 16,
+                color: isSelected ? 'white' : '#213576',
+              }}>
               {item}
             </Text>
-          </View>
+          </TouchableOpacity>
         );
       });
-    }
+    };
+
     return (
       <View>
         <Text>{value}</Text>
@@ -38,9 +63,10 @@ export class RangePicker extends Component {
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-            }}>
+            }}
+          >
             <TouchableOpacity
-              style={{flex: 1, width: '100%'}}
+              style={{ flex: 1, width: '100%' }}
               onPress={() => {
                 console.log('Close');
               }}
@@ -53,44 +79,46 @@ export class RangePicker extends Component {
                 width: '90%',
                 backgroundColor: '#d6ddf3',
                 borderRadius: 20,
-              }}>
+              }}
+            >
               <ScrollView showsVerticalScrollIndicator={false}>
-                <View style={{paddingTop: '70%', paddingBottom: '70%'}}>
                   {listOfOptions()}
-                </View>
               </ScrollView>
               <View
                 style={{
                   flexDirection: 'row',
                   height: 40,
                   marginTop: 20,
-                }}>
+                }}
+              >
                 <TouchableOpacity
                   style={{
                     flex: 1,
-                    backgroundColor: '#5e79d2',
+                    backgroundColor: '#3758c6',
                     marginHorizontal: 5,
                     alignItems: 'center',
                     justifyContent: 'center',
                     borderRadius: 50,
-                  }}>
-                  <Text>Cancel</Text>
+                  }}
+                >
+                  <Text style={{color:'white'}}>Cancel</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={{
                     flex: 1,
-                    backgroundColor: '#5e79d2',
+                    backgroundColor: '#3758c6',
                     marginHorizontal: 5,
                     alignItems: 'center',
                     justifyContent: 'center',
                     borderRadius: 50,
-                  }}>
-                  <Text>Confirm</Text>
+                  }}
+                >
+                <Text style={{color:'white'}}>Confirm</Text>
                 </TouchableOpacity>
               </View>
             </View>
             <TouchableOpacity
-              style={{flex: 1, width: '100%'}}
+              style={{ flex: 1, width: '100%' }}
               onPress={() => {
                 console.log('Close');
               }}

@@ -15,7 +15,14 @@ export class Home extends Component {
             source={require('../../assets/Home/whats-app-tools.jpg')}
           />
         </TouchableOpacity> */}
-        <RangePicker dataRange={[0, 100]} />
+        <RangePicker
+          dataRange={[0, 100]}
+          onChangeValue={value => {
+            console.log(value);
+          }}
+          resetAfterSelecting={true}
+          inputComponent={()=>{return<Text>Name</Text>}}
+        />
       </View>
     );
   }

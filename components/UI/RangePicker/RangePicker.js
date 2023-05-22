@@ -1,29 +1,55 @@
-import React, { Component } from 'react';
-import { Modal, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import React, {Component, createRef} from 'react';
+import {Modal, ScrollView, Text, TouchableOpacity, View} from 'react-native';
 
 export class RangePicker extends Component {
   state = {
+    modalVisible: false,
     options: [],
     value: 0,
     selectedIndex: 0,
+    emittedValue: 0,
   };
 
+  scrollViewRef = createRef();
+
   async componentDidMount() {
-    const { dataRange } = this.props;
+    const {dataRange} = this.props;
     await this.setState({
       options: Array.from(Array(dataRange[1] + 1).keys()).slice(dataRange[0]),
     });
   }
 
-  handleOptionPress = (index) => {
-    const { options } = this.state;
+  handleOptionPress = index => {
+    const {options} = this.state;
     const selectedOption = options[index];
-    this.setState({ selectedIndex: index, value: selectedOption });
+    this.setState({selectedIndex: index, value: selectedOption}, () => {
+      this.scrollToSelectedIndex();
+    });
   };
 
-  render() {
-    const { options, value, selectedIndex } = this.state;
+  scrollToSelectedIndex = () => {
+    const {selectedIndex} = this.state;
+    const scrollView = this.scrollViewRef.current;
+    const itemHeight = 40;
+    const offset = selectedIndex * itemHeight;
+    scrollView.scrollTo({y: offset, animated: true});
+  };
+  async handelCloseModal() {
+    const {onChangeValue, resetAfterSelecting} = this.props;
+    const {value} = this.state;
+    await this.setState({emittedValue: value});
+    await onChangeValue(value);
+    if (resetAfterSelecting) {
+      this.setState({value: 0, selectedIndex: 0, modalVisible: false});
+    } else {
+      this.setState({modalVisible: false});
+    }
+  }
 
+  render() {
+    const {options, value, selectedIndex, modalVisible, emittedValue} =
+      this.state;
+const {inputComponent} = this.props;
     const listOfOptions = () => {
       return options.map((item, index) => {
         const isSelected = selectedIndex === index;
@@ -34,7 +60,8 @@ export class RangePicker extends Component {
             onPress={() => this.handleOptionPress(index)}
             style={[
               {
-                borderRadius: 30,
+                borderTopLeftRadius: 40,
+                borderBottomRightRadius: 40,
                 marginVertical: 2.5,
                 paddingVertical: isSelected ? 10 : 5,
               },
@@ -44,7 +71,7 @@ export class RangePicker extends Component {
               style={{
                 textAlign: 'center',
                 fontSize: isSelected ? 20 : 16,
-                color: isSelected ? 'white' : '#213576',
+                color: isSelected ? 'white' : '#21357680',
               }}>
               {item}
             </Text>
@@ -55,20 +82,24 @@ export class RangePicker extends Component {
 
     return (
       <View>
-        <Text>{value}</Text>
-        <Modal visible={true} transparent={true} animationType="slide">
+        <TouchableOpacity
+          onPress={() => {
+            this.setState({modalVisible: true});
+          }}>
+          {inputComponent()}
+        </TouchableOpacity>
+        <Modal visible={modalVisible} transparent={true} animationType="slide">
           <View
             style={{
               flex: 1,
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-            }}
-          >
+            }}>
             <TouchableOpacity
-              style={{ flex: 1, width: '100%' }}
+              style={{flex: 1, width: '100%'}}
               onPress={() => {
-                console.log('Close');
+                this.handelCloseModal();
               }}
             />
             <View
@@ -79,48 +110,19 @@ export class RangePicker extends Component {
                 width: '90%',
                 backgroundColor: '#d6ddf3',
                 borderRadius: 20,
-              }}
-            >
-              <ScrollView showsVerticalScrollIndicator={false}>
+              }}>
+              <ScrollView
+                ref={this.scrollViewRef}
+                showsVerticalScrollIndicator={false}>
+                <View style={{paddingTop: '70%', paddingBottom: '70%'}}>
                   {listOfOptions()}
+                </View>
               </ScrollView>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  height: 40,
-                  marginTop: 20,
-                }}
-              >
-                <TouchableOpacity
-                  style={{
-                    flex: 1,
-                    backgroundColor: '#3758c6',
-                    marginHorizontal: 5,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    borderRadius: 50,
-                  }}
-                >
-                  <Text style={{color:'white'}}>Cancel</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={{
-                    flex: 1,
-                    backgroundColor: '#3758c6',
-                    marginHorizontal: 5,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    borderRadius: 50,
-                  }}
-                >
-                <Text style={{color:'white'}}>Confirm</Text>
-                </TouchableOpacity>
-              </View>
             </View>
             <TouchableOpacity
-              style={{ flex: 1, width: '100%' }}
+              style={{flex: 1, width: '100%'}}
               onPress={() => {
-                console.log('Close');
+                this.handelCloseModal();
               }}
             />
           </View>

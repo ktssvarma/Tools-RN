@@ -7,7 +7,6 @@ export class ChatOpen extends Component {
     }
     handelNavigateToWhatsApp(){
         const {number} = this.state;
-        console.log(`https://wa.me/+91${number}`)
         Linking.openURL(`https://wa.me/+91${number}`);
     }
   render() {
